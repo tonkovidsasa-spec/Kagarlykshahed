@@ -50,7 +50,7 @@ refresh();setInterval(refresh,60000);
  const node=document.getElementById('regionMap');if(!node||!window.L)return;
  const map=L.map(node,{zoomControl:true,scrollWheelZoom:true,minZoom:5,maxZoom:12,attributionControl:true}).setView([48.7,31.4],6);
  map.getContainer().style.background='#0c0c0d';
- L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'&copy; OpenStreetMap &copy; CARTO',opacity:1}).addTo(map);
+ /* Без сторонньої підкладки, яка вимагає API-ключ. Райони та кордони малюються локальними GeoJSON-шарами. */
  const base='https://cdn.jsdelivr.net/gh/darmat1/ukraine-geo-data@main/geodata/';
  let oblasts=null,district=null,currentColor='#8d9bb0',latestAlerts=null;let rayonLayers=[];
  const colors={off:'#151515',red:'#a82f28',yellow:'#c4a019',partial:'#ab7823',unknown:'#151515'};
