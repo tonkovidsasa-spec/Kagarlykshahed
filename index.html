@@ -50,7 +50,9 @@ refresh();setInterval(refresh,60000);
  const node=document.getElementById('regionMap');if(!node||!window.L)return;
  const map=L.map(node,{zoomControl:true,scrollWheelZoom:true,minZoom:5,maxZoom:12,attributionControl:true}).setView([48.7,31.4],6);
  map.getContainer().style.background='#0c0c0d';
- /* Без сторонньої підкладки, яка вимагає API-ключ. Райони та кордони малюються локальними GeoJSON-шарами. */
+ /* Темна картографічна підкладка з дорогами, водоймами та назвами населених пунктів. */
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(map);
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,opacity:.92,pane:'overlayPane'}).addTo(map);
  const base='https://cdn.jsdelivr.net/gh/darmat1/ukraine-geo-data@main/geodata/';
  let oblasts=null,district=null,currentColor='#8d9bb0',latestAlerts=null;let rayonLayers=[];
  const colors={off:'#151515',red:'#a82f28',yellow:'#c4a019',partial:'#ab7823',unknown:'#151515'};
@@ -58,7 +60,7 @@ refresh();setInterval(refresh,60000);
  const keys={'вінницька':'vinnytska','волинська':'volynska','дніпропетровська':'dnipropetrovska','донецька':'donetska','житомирська':'zhytomyrska','закарпатська':'zakarpatska','запорізька':'zaporizka','іванофранківська':'ivano-frankivska','київська':'kyivska','кіровоградська':'kirovohradska','луганська':'luhanska','львівська':'lvivska','миколаївська':'mykolaivska','одеська':'odeska','полтавська':'poltavska','рівненська':'rivnenska','сумська':'sumska','тернопільська':'ternopilska','харківська':'kharkivska','херсонська':'khersonska','хмельницька':'khmelnytska','черкаська':'cherkaska','чернівецька':'chernivetska','чернігівська':'chernihivska','аркрим':'krym','крим':'krym'};
  const oblastKey=p=>{const n=normalize(label(p));return keys[n]||null;};
  function alertColor(k){if(!latestAlerts)return colors.unknown;const group=latestAlerts.filter(a=>a.slug===k||a.oblast_slug===k);if(!group.length)return colors.off;const levels=group.map(a=>a.level);return levels.includes('red')?colors.red:levels.includes('yellow')?colors.yellow:colors.partial;}
- function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);l.setStyle({fillColor:c,fillOpacity:c===colors.off?0:.19,color:'#55585a',weight:1.15,opacity:.9});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
+ function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);l.setStyle({fillColor:c,fillOpacity:c===colors.off?0:.12,color:'#55585a',weight:1.15,opacity:.9});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
  window.updateUkraineAlerts=function(alerts){latestAlerts=alerts;paintOblasts();paintRayons();const legend=document.querySelector('.ukMapLegend');if(legend)legend.textContent=alerts?'🔴 Тривога  🟡 Дронова загроза  ⚫ Відбій · оновлення щохвилини':'Дані недоступні — перевірте офіційні сповіщення';};
  const demo={enabled:false,selected:null,overrides:new Map(),markers:[],mode:'select'}; const districtKey=(oblast,feature)=>oblast+'::'+String(label(feature.properties||{})).trim();
  const toggle=document.getElementById('demoToggle'),panel=document.getElementById('demoPanel'),notice=document.getElementById('demoNotice');
@@ -99,7 +101,7 @@ refresh();setInterval(refresh,60000);
  function paintRayons(){
   rayonLayers.forEach(({layer,slug})=>layer.eachLayer(l=>{
    const override=demo.enabled&&(demo.overrides.get(districtKey(slug,l.feature))||demo.overrides.get(slug));const st=override?{color:override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off,label:'Тестовий статус'}:rayonStatus(l.feature,slug);
-   l.setStyle({fillColor:st.color,fillOpacity:st.color===colors.off?0:.23,color:'#48494a',weight:.9,opacity:.92});
+   l.setStyle({fillColor:st.color,fillOpacity:st.color===colors.off?0:.15,color:'#48494a',weight:.9,opacity:.92});
    l.bindTooltip(label(l.feature.properties||{})+' · '+st.label,{sticky:true});
   }));
   /* Без виділення Обухівського району */
@@ -119,7 +121,7 @@ refresh();setInterval(refresh,60000);
  const cities=[
   ['Кагарлик',49.8522,30.8092,false],['Київ',50.4501,30.5234],['Буча',50.549,30.219],['Ірпінь',50.5218,30.2506],['Обухів',50.1067,30.6227],['Біла Церква',49.7968,30.1311],['Бориспіль',50.351,30.956],['Бровари',50.511,30.79],['Вишгород',50.584,30.49],['Фастів',50.0767,29.918],['Ржищів',49.97,31.05],['Українка',50.143,30.746],['Васильків',50.178,30.317],['Миронівка',49.66,30.982],['Переяслав',50.066,31.448],['Чернігів',51.498,31.289],['Житомир',50.254,28.659],['Полтава',49.588,34.551],['Харків',49.993,36.23],['Одеса',46.482,30.723],['Львів',49.839,24.03],['Дніпро',48.464,35.046],['Запоріжжя',47.839,35.139],['Черкаси',49.444,32.059],['Суми',50.907,34.799],['Вінниця',49.233,28.468],['Рівне',50.619,26.251],['Луцьк',50.747,25.325],['Тернопіль',49.553,25.594],['Хмельницький',49.422,26.987],['Ужгород',48.62,22.287],['Івано-Франківськ',48.922,24.71],['Чернівці',48.292,25.935],['Кропивницький',48.507,32.262],['Миколаїв',46.975,31.995],['Херсон',46.636,32.617],['Умань',48.748,30.22],['Сміла',49.222,31.887],['Кременчук',49.065,33.41],['Ніжин',51.05,31.88],['Прилуки',50.593,32.387],['Золотоноша',49.668,32.041],['Ковель',51.215,24.709],['Мукачево',48.439,22.718]
  ];
- const cityLayer=L.layerGroup().addTo(map);
+ const cityLayer=L.layerGroup(); /* Назви міст і дороги показує картографічна підкладка, без дублювання */
  function paintCities(){
   cityLayer.clearLayers();
   const z=map.getZoom();
@@ -130,11 +132,11 @@ refresh();setInterval(refresh,60000);
    point.bindTooltip(name,{permanent:true,direction:main?'top':'right',offset:main?[0,-5]:[5,0],className:'cityNameLabel'});
   });
  }
- map.on('zoomend',paintCities);paintCities();
+ /* Системні підписи з підкладки */
  const villages=[['Стрітівка',49.94,30.76],['Стайки',50.07,30.90],['Халча',49.99,31.02],['Гребені',50.02,30.89],['Дівички',50.09,31.12],['Трипілля',50.12,30.78],['Витачів',50.07,30.87],['Пії',49.72,30.97],['Карапиші',49.64,30.79],['Росава',49.72,31.05],['Зеленьки',49.68,31.18],['Маслівка',49.68,31.08],['Потік',49.82,31.04],['Слобода',49.79,30.87],['Шубівка',49.84,30.61],['Леонівка',49.78,30.75],['Сущани',49.89,30.73],['Великі Дмитровичі',50.08,30.60],['Малі Дмитровичі',50.07,30.65],['Козин',50.23,30.65],['Підгірці',50.25,30.56],['Хотів',50.33,30.47],['Гатне',50.36,30.41],['Чабани',50.34,30.43]];
- const villageLayer=L.layerGroup().addTo(map);
+ const villageLayer=L.layerGroup(); /* Назви сіл показує підкладка */
  function paintVillages(){villageLayer.clearLayers();if(map.getZoom()<10)return;villages.forEach(([name,lat,lng])=>{const p=L.circleMarker([lat,lng],{radius:1.25,color:'#aab2bd',weight:0,fillColor:'#aab2bd',fillOpacity:.85}).addTo(villageLayer);p.bindTooltip(name,{permanent:true,direction:'right',offset:[4,0],className:'cityNameLabel'});});}
- map.on('zoomend',paintVillages);paintVillages();
+ /* Системні підписи сіл з підкладки */
 
  async function draw(){
   try{
@@ -159,15 +161,4 @@ refresh();setInterval(refresh,60000);
  }
  draw();
 })();
-</script><style>
-#neptunBase{position:fixed;inset:0;z-index:1000;background:#151a20}
-#neptunBase iframe{display:block;width:100%;height:100%;border:0}
-#baseSwitch{position:fixed;top:12px;right:12px;z-index:1100;background:#242930;color:#fff;border:1px solid #505863;border-radius:9px;padding:10px 13px;font:600 12px system-ui;cursor:pointer}
-#neptunCredit{position:fixed;bottom:9px;left:12px;z-index:1100;background:#151a20df;padding:5px 9px;border-radius:6px;font:11px system-ui;color:#aebdcc;text-decoration:none}
-</style>
-<div id="neptunBase"><iframe src="https://neptun.in.ua/embed/map?lang=uk" title="Картографічна основа та карта NEPTUN" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-<button id="baseSwitch" type="button">Мапа KSH (тест)</button>
-<a id="neptunCredit" href="https://neptun.in.ua/" target="_blank" rel="noopener">Карта повітряних тривог України — NEPTUN</a>
-<script>
-(function(){const b=document.getElementById('baseSwitch'),n=document.getElementById('neptunBase'),c=document.getElementById('neptunCredit');let showNeptun=true;b.addEventListener('click',()=>{showNeptun=!showNeptun;n.hidden=!showNeptun;c.hidden=!showNeptun;b.textContent=showNeptun?'Мапа KSH (тест)':'Показати NEPTUN';});})();
 </script></body></html>
