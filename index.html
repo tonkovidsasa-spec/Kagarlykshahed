@@ -51,7 +51,12 @@ refresh();setInterval(refresh,60000);
  const map=L.map(node,{zoomControl:true,scrollWheelZoom:true,minZoom:5,maxZoom:12,attributionControl:true}).setView([48.7,31.4],6);
  map.getContainer().style.background='#0c0c0d';
  /* Темна картографічна підкладка з дорогами, водоймами та назвами населених пунктів. */
- /* Власна темна векторна карта без сторонніх API-ключів та тайлів. */
+ /* Деталізована підкладка з дорогами, водоймами та забудовою на великому масштабі. */
+ const detailPane=map.createPane('detailTiles');detailPane.style.zIndex='180';detailPane.style.pointerEvents='none';
+ const detailTiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{pane:'detailTiles',maxZoom:19,minZoom:8,opacity:1,attribution:'&copy; OpenStreetMap contributors',className:'ksh-detail-tiles'});
+ const detailCss=document.createElement('style');detailCss.textContent='.ksh-detail-tiles{filter:grayscale(1) invert(1) brightness(.52) contrast(1.35) saturate(.25)}';document.head.appendChild(detailCss);
+ function updateDetail(){if(map.getZoom()>=9){if(!map.hasLayer(detailTiles))detailTiles.addTo(map);}else if(map.hasLayer(detailTiles)){map.removeLayer(detailTiles);}if(oblasts)paintOblasts();paintRayons();}
+ map.on('zoomend',updateDetail);
 
  const base='https://cdn.jsdelivr.net/gh/darmat1/ukraine-geo-data@main/geodata/';
  let oblasts=null,district=null,currentColor='#8d9bb0',latestAlerts=null;let rayonLayers=[];
@@ -60,7 +65,7 @@ refresh();setInterval(refresh,60000);
  const keys={'вінницька':'vinnytska','волинська':'volynska','дніпропетровська':'dnipropetrovska','донецька':'donetska','житомирська':'zhytomyrska','закарпатська':'zakarpatska','запорізька':'zaporizka','іванофранківська':'ivano-frankivska','київська':'kyivska','кіровоградська':'kirovohradska','луганська':'luhanska','львівська':'lvivska','миколаївська':'mykolaivska','одеська':'odeska','полтавська':'poltavska','рівненська':'rivnenska','сумська':'sumska','тернопільська':'ternopilska','харківська':'kharkivska','херсонська':'khersonska','хмельницька':'khmelnytska','черкаська':'cherkaska','чернівецька':'chernivetska','чернігівська':'chernihivska','аркрим':'krym','крим':'krym'};
  const oblastKey=p=>{const n=normalize(label(p));return keys[n]||null;};
  function alertColor(k){if(!latestAlerts)return colors.unknown;const group=latestAlerts.filter(a=>a.slug===k||a.oblast_slug===k);if(!group.length)return colors.off;const levels=group.map(a=>a.level);return levels.includes('red')?colors.red:levels.includes('yellow')?colors.yellow:colors.partial;}
- function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);l.setStyle({fillColor:c,fillOpacity:.9,color:'#1c2530',weight:.65,opacity:.9});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
+ function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);l.setStyle({fillColor:c,fillOpacity:map.getZoom()>=9?.48:.9,color:'#1c2530',weight:.65,opacity:.9});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
  window.updateUkraineAlerts=function(alerts){latestAlerts=alerts;paintOblasts();paintRayons();const legend=document.querySelector('.ukMapLegend');if(legend)legend.textContent=alerts?'🔴 Тривога  🟡 Дронова загроза  ⚫ Відбій · оновлення щохвилини':'Дані недоступні — перевірте офіційні сповіщення';};
  const demo={enabled:false,selected:null,overrides:new Map(),markers:[],mode:'select'}; const districtKey=(oblast,feature)=>oblast+'::'+String(label(feature.properties||{})).trim();
  const toggle=document.getElementById('demoToggle'),panel=document.getElementById('demoPanel'),notice=document.getElementById('demoNotice');
@@ -101,7 +106,7 @@ refresh();setInterval(refresh,60000);
  function paintRayons(){
   rayonLayers.forEach(({layer,slug})=>layer.eachLayer(l=>{
    const override=demo.enabled&&(demo.overrides.get(districtKey(slug,l.feature))||demo.overrides.get(slug));const st=override?{color:override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off,label:'Тестовий статус'}:rayonStatus(l.feature,slug);
-   l.setStyle({fillColor:st.color,fillOpacity:.85,color:'#1b2430',weight:.55,opacity:.92});
+   l.setStyle({fillColor:st.color,fillOpacity:map.getZoom()>=9?.48:.85,color:'#1b2430',weight:.55,opacity:.92});
    l.bindTooltip(label(l.feature.properties||{})+' · '+st.label,{sticky:true});
   }));
   /* Без виділення Обухівського району */
@@ -146,7 +151,7 @@ refresh();setInterval(refresh,60000);
    oblasts=L.geoJSON(geo,{style:{color:'#595b5d',weight:1.1,fillColor:colors.off,fillOpacity:.9},onEachFeature:(f,l)=>{
     const name=label(f.properties||{});l.bindTooltip(name,{sticky:true});l.on('click',()=>{if(!demo.enabled)return;demo.selected=oblastKey(f.properties||{});document.getElementById('demoSelected').textContent='Обрано: '+name;});
    }}).addTo(map);
-   map.fitBounds(oblasts.getBounds(),{padding:[14,14]});paintOblasts();loadRayons(fs);
+   map.fitBounds(oblasts.getBounds(),{padding:[14,14]});paintOblasts();loadRayons(fs);updateDetail();
    const kyiv=fs.find(f=>/київськ|kyivsk|kievsk/i.test(JSON.stringify(f.properties||{})));
    /* Жодного кольорового виділення областей */
   }catch(e){console.warn('Не вдалося завантажити карту областей',e);node.insertAdjacentHTML('beforeend','<div class="mapBoundaryWarning">Не вдалося завантажити межі областей. Спробуйте оновити сторінку.</div>');}
