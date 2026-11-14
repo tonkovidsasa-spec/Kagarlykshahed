@@ -182,7 +182,7 @@ refresh();setInterval(refresh,60000);
  map.on('zoomend',paintCities);paintCities();
  const villages=[['Стрітівка',49.94,30.76],['Стайки',50.07,30.90],['Халча',49.99,31.02],['Гребені',50.02,30.89],['Дівички',50.09,31.12],['Трипілля',50.12,30.78],['Витачів',50.07,30.87],['Пії',49.72,30.97],['Карапиші',49.64,30.79],['Росава',49.72,31.05],['Зеленьки',49.68,31.18],['Маслівка',49.68,31.08],['Потік',49.82,31.04],['Слобода',49.79,30.87],['Шубівка',49.84,30.61],['Леонівка',49.78,30.75],['Сущани',49.89,30.73],['Великі Дмитровичі',50.08,30.60],['Малі Дмитровичі',50.07,30.65],['Козин',50.23,30.65],['Підгірці',50.25,30.56],['Хотів',50.33,30.47],['Гатне',50.36,30.41],['Чабани',50.34,30.43]];
  const villageLayer=L.layerGroup().addTo(map);
- function paintVillages(){villageLayer.clearLayers();return; /* Села підписані на темній підкладці, без додаткових яскравих міток. */ if(map.getZoom()<10)return;villages.forEach(([name,lat,lng])=>{const p=L.circleMarker([lat,lng],{radius:1.25,color:'#aab2bd',weight:0,fillColor:'#aab2bd',fillOpacity:.85}).addTo(villageLayer);p.bindTooltip(name,{permanent:true,direction:'right',offset:[4,0],className:'cityNameLabel'});});}
+ function paintVillages(){villageLayer.clearLayers(); /* Населені пункти вже підписані на детальній картографічній підкладці. */ }
  map.on('zoomend',paintVillages);paintVillages();
 
  async function draw(){
