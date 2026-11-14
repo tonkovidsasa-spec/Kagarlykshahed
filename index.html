@@ -1,40 +1,64 @@
 <!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b0e"><meta name="description" content="Кагарлик Моніторинг — карта повітряних тривог України"><title>Кагарлик | Карта загроз · новий стиль</title><link rel="icon" href="logo.png"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>:root{color-scheme:dark}*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#11161d;color:#e8edf3;font:13px system-ui,-apple-system,Segoe UI,sans-serif}#liveMapFrame,#regionMap{position:absolute;inset:0;width:100%;height:100%!important;background:#090b0e}.leaflet-container{background:#090b0e!important}.leaflet-control-attribution{background:#121518bb!important;color:#a0a9b5!important}.leaflet-control-zoom a{background:#171c23!important;color:#fff!important;border-color:#39404b!important}.mapAlertOverlay{position:absolute;z-index:750;top:16px;left:16px;display:flex;gap:10px;align-items:center;max-width:270px;background:#0d1015e8;border:1px solid #30343b;border-left:3px solid #8795a8;border-radius:12px;padding:12px 15px;box-shadow:0 5px 22px #0007}.mapAlertDot{height:9px;width:9px;border-radius:50%;background:#8795a8;flex:none}.mapAlertOverlay strong{font-size:12px;display:block}.mapAlertOverlay small{display:block;color:#9ba5b2;font-size:10px;margin-top:5px}.mapAlertOverlay:empty{display:none}.topRight{position:absolute;z-index:750;top:16px;right:16px;background:#0d1015e8;border:1px solid #30343b;border-radius:12px;padding:13px 15px;font-weight:700;font-size:12px}.topRight a{color:#e5b43c;text-decoration:none}.bottomNav{position:absolute;z-index:750;bottom:17px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:18px;padding:12px 18px;border:1px solid #30343b;border-radius:14px;background:#0d1015ed;box-shadow:0 4px 24px #0008}.bottomNav a{color:#e2e6ed;text-decoration:none;font-size:11px;font-weight:800;white-space:nowrap}.bottomNav a:first-child{color:#ffbb32}.bottomNav span{height:18px;border-left:1px solid #3b4048}.ukMapLegend{background:#0d1015e8!important;color:#b9c3ce!important;border:1px solid #30343b!important;border-radius:9px!important;padding:9px 11px!important;font-size:11px!important}.cityNameLabel,.mainCityLabel{background:transparent!important;border:0!important;box-shadow:none!important;color:#868c94!important;text-shadow:none!important;font-weight:400!important;font-size:11px!important}.mainCityLabel{color:#a3a8b0!important;font-weight:500!important}.cityNameLabel:before,.mainCityLabel:before{display:none!important}.hiddenStatus{display:none}@media(max-width:600px){.mapAlertOverlay{top:9px;left:9px;padding:9px;max-width:200px}.topRight{top:9px;right:9px;padding:9px}.bottomNav{bottom:12px;gap:11px;padding:11px}.bottomNav a{font-size:10px}}</style><style>.demoToggle{position:absolute;z-index:850;right:15px;top:75px;background:#1b2532;color:#fff;border:1px solid #5c6b7b;border-radius:9px;padding:10px;cursor:pointer}.demoPanel{position:absolute;z-index:850;right:15px;top:120px;width:265px;background:#101923f5;border:1px solid #46566a;border-radius:12px;padding:14px}.demoPanel[hidden],.demoNotice[hidden]{display:none}.demoPanel p{font-size:11px;color:#b9c8d7}.demoPanel button{background:#223247;color:#fff;border:1px solid #435a72;border-radius:7px;padding:8px;margin:3px;cursor:pointer}.demoNotice{position:absolute;z-index:800;left:50%;top:15px;transform:translateX(-50%);background:#6d2834;padding:8px 12px;border-radius:7px;font-weight:800;font-size:12px;pointer-events:none}@media(max-width:650px){.demoToggle{right:8px;top:66px}.demoPanel{right:8px;top:108px;width:230px}}</style><style>.leaflet-container{background:#0b0b0c!important}.ukMapLegend{opacity:.8}.demoPanel{max-height:70vh;overflow:auto}</style><style>.leaflet-control-zoom{margin-top:10px!important;margin-left:10px!important}.leaflet-control-zoom a{background:#171719!important;color:#eee!important}.leaflet-tooltip.cityNameLabel{color:#868c94!important;font-size:11px!important;font-weight:400!important;text-shadow:none!important}.demoPanel{background:#252528f7!important;border-color:#444!important}.demoToggle{background:#242427!important}.topRight{background:#252528ef!important}</style><style>.demoToggle{top:12px!important;right:12px!important;background:#1c1c1fe8!important;border-color:#343438!important;font-size:11px!important}.demoPanel{top:55px!important;right:12px!important}.leaflet-control-zoom{margin-top:12px!important;margin-left:12px!important}.leaflet-container{background:#11161d!important}</style><style>.leaflet-container{background:#11161d!important}.leaflet-tooltip.cityNameLabel{color:#868c94!important;text-shadow:none!important}.demoNotice{background:#692831b8!important}.demoToggle{opacity:.83}</style><style>.ksh-oblast-name{background:none!important;border:0!important;text-align:center;pointer-events:none!important;white-space:nowrap;color:#858b94;font:400 11px/22px system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:.01em;text-shadow:0 1px 1px #14181d}.ksh-oblast-name span{display:inline-block}.leaflet-container,#regionMap,#liveMapFrame{background:#14181d!important}.ksh-detail-tiles{filter:grayscale(1) invert(1) brightness(.58) contrast(1.16) saturate(.10)}.leaflet-div-icon{background:transparent;border:0}</style>
 <style>
-/* Компактна нижня навігація KSH у стилі темної моніторингової карти */
-#kshDock{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:950;display:flex;align-items:stretch;gap:0;background:#0b0e13f2;border:1px solid #29313a;border-radius:14px;box-shadow:0 12px 30px #0008;padding:8px 10px;max-width:calc(100vw - 20px)}
-#kshDock .kshNavAction{appearance:none;border:0;background:transparent;color:#939aa3;text-decoration:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:80px;padding:7px 10px;position:relative;font:600 9px/1.1 system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:.07em;white-space:nowrap}
-#kshDock .kshNavAction+.kshNavAction:before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:1px;background:#252d36}
-#kshDock svg{width:19px;height:19px;display:block;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
-#kshDock .kshNavAction:hover,#kshDock .kshNavAction:focus-visible{color:#e6eaf0}
-#kshDock #kshThreats{color:#f05b58}
-#kshDock #kshSupport{color:#e8b13c}
-#kshDock .kshNavAction[aria-expanded=true]{background:#1b222b;border-radius:9px}
-#kshDockPanel{position:absolute;bottom:98px;left:50%;transform:translateX(-50%);z-index:960;width:min(375px,calc(100vw - 24px));padding:17px 18px 18px;background:#10151bf5;border:1px solid #343d47;border-radius:13px;box-shadow:0 14px 42px #000a;color:#cbd1d9}
+/* KSH ORIGINAL: дві незалежні floating-панелі — бренд і управління */
+#kshDock{position:fixed;z-index:950;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:stretch;gap:10px;max-width:calc(100vw - 24px);width:max-content;filter:drop-shadow(0 10px 22px #0008)}
+#kshDock .kshBrand{display:flex;align-items:center;gap:10px;flex-shrink:0;padding:8px 16px 8px 10px;background:linear-gradient(125deg,#15252eec,#0c121aec);border:1px solid #35505d;border-radius:17px;color:#eff6f7}
+#kshDock .kshBrandMark{width:36px;height:36px;display:grid;place-items:center;flex-shrink:0;border-radius:11px;background:linear-gradient(145deg,#213b47,#0e222c);border:1px solid #4a8491}
+#kshDock .kshBrandMark svg{width:21px;height:21px;fill:none;stroke:#85e0ed;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+#kshDock .kshBrandName{display:block;font:800 15px/1.1 system-ui,sans-serif;letter-spacing:.16em}
+#kshDock .kshBrandSub{display:block;margin-top:4px;color:#8dabb7;font:600 8px/1.1 system-ui,sans-serif;letter-spacing:.12em;white-space:nowrap}
+#kshDock .kshNavCluster{display:flex;gap:4px;padding:6px;background:#10171fef;border:1px solid #34424e;border-radius:17px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#kshDock .kshNavAction{appearance:none;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;min-height:44px;min-width:94px;padding:7px 11px;color:#c1cbd6;background:transparent;border:1px solid transparent;border-radius:11px;cursor:pointer;text-decoration:none;font:600 11px/1.2 system-ui,sans-serif;white-space:nowrap;transition:background .15s ease,border-color .15s ease,color .15s ease}
+#kshDock .kshNavAction svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.85;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+#kshDock .kshNavAction:hover{background:#273644;color:#f7fafc}
+#kshDock .kshNavAction:focus-visible{outline:2px solid #8ee4e8;outline-offset:2px}
+#kshDock #kshThreats{color:#ff9588}
+#kshDock #kshThreats:hover{background:#462822}
+#kshDock #kshChannel{color:#9cdee5}
+#kshDock #kshSupport{color:#efd197}
+#kshDock #kshSupport svg{fill:none!important}
+#kshDock .kshNavAction[aria-expanded=true]{background:#233844;border-color:#4b8795;color:#f3fbfd}
+#kshDockPanel{position:fixed;bottom:102px;left:50%;transform:translateX(-50%);z-index:960;width:min(390px,calc(100vw - 24px));padding:18px 20px;background:#111a22f5;border:1px solid #48616c;border-radius:17px;box-shadow:0 16px 45px #0009;color:#d2dce4;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 #kshDockPanel[hidden]{display:none!important}
-#kshDockPanel h2{margin:0 28px 10px 0;font-size:14px;font-weight:700;line-height:1.3;color:#e5eaf0}
-#kshDockPanel p{font-size:12px;line-height:1.55;margin:7px 0 0;color:#aeb6c0}
-#kshDockPanel .kshPaneMeta{font-size:10px;color:#79838d;margin-top:11px}
-#kshClosePanel{appearance:none;position:absolute;right:10px;top:10px;border:0;background:#212932;color:#c2c9d3;border-radius:7px;width:28px;height:28px;font-size:18px;cursor:pointer}
-@media(max-width:540px){
- #kshDock{bottom:12px;padding:5px 4px;border-radius:12px}
- #kshDock .kshNavAction{min-width:72px;padding:7px 6px;font-size:9px;gap:5px}
- #kshDock svg{width:18px;height:18px}
- #kshDockPanel{bottom:83px}
+#kshDockPanel h2{margin:0 28px 10px 0;font-size:14px;font-weight:700;line-height:1.35;color:#eaf4f6}
+#kshDockPanel p{font-size:12px;line-height:1.55;margin:7px 0 0;color:#b2c3ce}
+#kshDockPanel .kshPaneMeta{font-size:10px;color:#8c9eaa;margin-top:11px}
+#kshClosePanel{appearance:none;position:absolute;right:10px;top:10px;border:0;background:#263641;color:#dae5eb;border-radius:8px;width:28px;height:28px;font-size:18px;cursor:pointer}
+@media(max-width:700px){
+ #kshDock{bottom:12px;gap:6px;max-width:calc(100vw - 12px)}
+ #kshDock .kshBrand{padding:5px;border-radius:13px}
+ #kshDock .kshBrandMark{width:33px;height:33px;border-radius:9px}
+ #kshDock .kshBrandText{display:none}
+ #kshDock .kshNavCluster{gap:2px;padding:4px;border-radius:13px}
+ #kshDock .kshNavAction{min-width:0;min-height:41px;gap:4px;flex-direction:column;padding:5px 8px;font-size:9px;border-radius:10px}
+ #kshDock .kshNavAction svg{height:17px;width:17px}
+ #kshDockPanel{bottom:82px}
 }
+@media(max-width:370px){
+ #kshDock .kshNavAction{padding:5px 5px;font-size:8.5px}
+ #kshDock .kshBrandMark{width:30px;height:32px}
+}
+@media(prefers-reduced-motion:reduce){#kshDock .kshNavAction{transition:none}}
 </style></head><body><div id="liveMapFrame"><div id="regionMap" role="application" aria-label="Карта повітряних тривог України"></div></div><button id="demoToggle" class="demoToggle">⚙ ТЕСТОВИЙ РЕЖИМ</button><div id="demoPanel" class="demoPanel" hidden><b>Умовні тривоги</b><p>Лише в цьому браузері. Вибери район на карті, а потім статус. Область теж можна вибрати окремо. Інші відвідувачі змін не побачать.</p><div id="demoSelected">Область не вибрано</div><button data-demo="red">🔴 Тривога</button><button data-demo="yellow">🟡 Загроза</button><button data-demo="off">⚫ Відбій</button><button id="demoMarker">◇ Шахед (умовний)</button><button id="demoBallistic">↑ Балістика (умовна)</button><button id="demoClear">Скинути</button><p>Це навчальна симуляція, не офіційні сповіщення. Маркери шахедів і балістики умовні, не відображають реальних цілей, місць запуску чи маршрутів.</p></div><div id="demoNotice" class="demoNotice" hidden>ТЕСТОВИЙ РЕЖИМ</div>
-<nav id="kshDock" aria-label="Навігація карти KSH">
- <button id="kshThreats" type="button" class="kshNavAction" aria-controls="kshDockPanel" aria-expanded="false">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v11H9l-4 3V5Z"/></svg><span>ЗАГРОЗИ</span>
- </button>
- <a id="kshChannel" class="kshNavAction" href="https://t.me/kagarlykshaheds" target="_blank" rel="noopener noreferrer">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-8.3 18-3.1-7-7-3L21 3Z"/><path d="m9.6 14 5.2-5.2"/></svg><span>КАНАЛ</span>
- </a>
- <button id="kshAbout" type="button" class="kshNavAction" aria-controls="kshDockPanel" aria-expanded="false">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg><span>ПРО ПРОЄКТ</span>
- </button>
- <a id="kshSupport" class="kshNavAction" href="https://t.me/share/url?url=https%3A%2F%2Ft.me%2Fkagarlykshaheds" target="_blank" rel="noopener noreferrer" title="Підтримати поширенням каналу">
-  <svg viewBox="0 0 24 24" aria-hidden="true" style="stroke-width:1.6;fill:#e8b13c"><path d="M20.8 8.7c0 4.5-8.8 10.3-8.8 10.3S3.2 13.2 3.2 8.7a4.7 4.7 0 0 1 8.8-2.2 4.7 4.7 0 0 1 8.8 2.2Z"/></svg><span>ПІДТРИМАТИ</span>
- </a>
+<nav id="kshDock" aria-label="Панель KSH">
+ <div class="kshBrand" aria-label="KSH — Кагарлик Моніторинг">
+  <span class="kshBrandMark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M6.1 6.1a8.3 8.3 0 0 0 0 11.8M17.9 6.1a8.3 8.3 0 0 1 0 11.8M9 9a4.4 4.4 0 0 0 0 6M15 9a4.4 4.4 0 0 1 0 6"/></svg></span>
+  <span class="kshBrandText"><span class="kshBrandName">KSH</span><span class="kshBrandSub">КАГАРЛИК · МОНІТОРИНГ</span></span>
+ </div>
+ <div class="kshNavCluster">
+  <button id="kshThreats" type="button" class="kshNavAction" aria-controls="kshDockPanel" aria-expanded="false" title="Поточний статус повітряних загроз">
+   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 19h18.4L12 3Z"/><path d="M12 9v4.5M12 17h.01"/></svg><span>Загрози</span>
+  </button>
+  <a id="kshChannel" class="kshNavAction" href="https://t.me/kagarlykshaheds" target="_blank" rel="noopener noreferrer" title="Telegram-канал KSH">
+   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 3-8.3 18-3.1-7-7-3L21 3Z"/><path d="m9.6 14 5.2-5.2"/></svg><span>Канал</span>
+  </a>
+  <button id="kshAbout" type="button" class="kshNavAction" aria-controls="kshDockPanel" aria-expanded="false" title="Про KSH">
+   <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></svg><span>Про KSH</span>
+  </button>
+  <a id="kshSupport" class="kshNavAction" href="https://t.me/share/url?url=https%3A%2F%2Ft.me%2Fkagarlykshaheds" target="_blank" rel="noopener noreferrer" title="Підтримати KSH поширенням каналу">
+   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.7c0 4.5-8.8 10.3-8.8 10.3S3.2 13.2 3.2 8.7a4.7 4.7 0 0 1 8.8-2.2 4.7 4.7 0 0 1 8.8 2.2Z"/></svg><span>Підтримати</span>
+  </a>
+ </div>
 </nav>
 <section id="kshDockPanel" aria-label="Інформація про карту" hidden>
  <button id="kshClosePanel" type="button" aria-label="Закрити">×</button>
