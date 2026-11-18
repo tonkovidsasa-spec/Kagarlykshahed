@@ -53,7 +53,7 @@
 #demoDuration{background:#1f2a35;color:#eaf0f6;border:1px solid #46576a;border-radius:7px;padding:7px}
 @media(max-width:650px){.demoPanel{width:min(289px,calc(100vw - 20px))!important}.demoNotice{top:4px;font-size:10px}}
 /* Спокійна світла підкладка без нічної інверсії, як у референсі. */
-.ksh-detail-tiles{filter:none!important;opacity:1!important}
+.ksh-detail-tiles{filter:saturate(.79) brightness(1.06) contrast(.94)!important;opacity:1!important}
 .leaflet-container,#regionMap,#liveMapFrame{background:#dce7d3!important}
 .leaflet-control-attribution{background:#fffdf4d9!important;color:#535f5c!important}
 .leaflet-control-attribution a{color:#286cab!important}
@@ -112,7 +112,6 @@ async function refresh(){
   const data=await response.json();
   if(!data||!Array.isArray(data.alerts))throw Error('Некоректні дані');
   const alerts=data.alerts;
-  if(window.updateUkraineAlerts)window.updateUkraineAlerts(alerts);
   const local=alerts.filter(a=>/обухівськ/i.test(a.name_uk||'')||/obukh/i.test(a.slug||''));
   const oblast=alerts.filter(a=>(a.slug==='kyivska'||/київська область/i.test(a.name_uk||''))&&a.type!=='district');
   const active=local.length?local:oblast;
@@ -120,6 +119,7 @@ async function refresh(){
   if(isNaN(time.getTime()))throw Error('Некоректний час');
   const age=Date.now()-time.getTime();
   if(age>15*60*1000)throw Error('Застарілі дані');
+  if(window.updateUkraineAlerts)window.updateUkraineAlerts(alerts);
   checked.textContent=time.toLocaleTimeString('uk-UA',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Kyiv'});
   if(active.length){
    const levels=active.map(a=>String(a.level||'').toLowerCase());
@@ -151,7 +151,9 @@ refresh();setInterval(refresh,60000);
  const overviewTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
   pane:'overviewTiles',maxZoom:13,minZoom:5,attribution:'Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors',className:'ksh-overview-tiles'
  }).addTo(map);
- const detailTiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{pane:'detailTiles',maxZoom:19,minZoom:8,opacity:1,attribution:'&copy; OpenStreetMap contributors',className:'ksh-detail-tiles'});
+ const detailTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{pane:'detailTiles',maxZoom:19,minZoom:8,opacity:1,attribution:'Tiles &copy; Esri and contributors; OpenStreetMap',className:'ksh-detail-tiles'});
+ let detailFallback=false;
+ detailTiles.on('tileerror',()=>{if(detailFallback)return;detailFallback=true;detailTiles.setUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png');});
  let overviewFallback=false;
  overviewTiles.on('tileerror',()=>{
   if(overviewFallback)return;overviewFallback=true;
@@ -173,7 +175,7 @@ refresh();setInterval(refresh,60000);
  const keys={'вінницька':'vinnytska','волинська':'volynska','дніпропетровська':'dnipropetrovska','донецька':'donetska','житомирська':'zhytomyrska','закарпатська':'zakarpatska','запорізька':'zaporizka','іванофранківська':'ivano-frankivska','київська':'kyivska','кіровоградська':'kirovohradska','луганська':'luhanska','львівська':'lvivska','миколаївська':'mykolaivska','одеська':'odeska','полтавська':'poltavska','рівненська':'rivnenska','сумська':'sumska','тернопільська':'ternopilska','харківська':'kharkivska','херсонська':'khersonska','хмельницька':'khmelnytska','черкаська':'cherkaska','чернівецька':'chernivetska','чернігівська':'chernihivska','аркрим':'krym','крим':'krym'};
  const oblastKey=p=>{const n=normalize(label(p));return keys[n]||null;};
  function alertColor(k){if(!latestAlerts)return colors.unknown;const group=latestAlerts.filter(a=>a.type!=='district'&&a.slug===k);if(!group.length)return colors.off;const levels=group.map(a=>a.level);return levels.includes('red')?colors.red:levels.includes('yellow')?colors.yellow:colors.partial;}
- function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);const isActive=c!==colors.off&&c!==colors.unknown;l.setStyle({fillColor:isActive?c:colors.off,fillOpacity:isActive?(map.getZoom()>=8?.29:.40):(latestAlerts?.14:.07),color:isActive?(c===colors.red?'#c54a56':'#dab324'):'#9aaea0',weight:isActive?1.2:.55,opacity:isActive?.88:.55});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
+ function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);const isActive=c!==colors.off&&c!==colors.unknown;l.setStyle({fillColor:isActive?c:colors.off,fillOpacity:isActive?(map.getZoom()>=8?.33:.54):0,color:isActive?(c===colors.red?'#ca4754':'#d6b01d'):'#b6c3b9',weight:isActive?1.6:.65,opacity:isActive?.98:.66});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
 
  const oblastLabelPoints=[
   ['Волинська',50.78,25.05],['Рівненська',50.62,26.37],['Житомирська',50.45,28.77],
@@ -309,7 +311,16 @@ refresh();setInterval(refresh,60000);
    const override=demo.enabled&&(demo.overrides.get(districtKey(slug,l.feature))||demo.overrides.get(slug));const st=override?{color:override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off,label:'Тестовий статус'}:rayonStatus(l.feature,slug);
    const isActive=st.color!==colors.off&&st.color!==colors.unknown;
    const close=map.getZoom()>=8;
-   l.setStyle({fillColor:st.color,fillOpacity:close&&isActive?.25:0,color:isActive?(st.color===colors.red?'#bd4b57':'#d7b32b'):'#a9b5aa',weight:close?(isActive?1.1:.55):0,opacity:close?(isActive?.85:.35):0,dashArray:''});
+   // Тривога в конкретному районі має бути видимою навіть на масштабі всієї України.
+   l.setStyle({
+    fillColor:st.color,
+    fillOpacity:isActive?(close?.37:.66):0,
+    color:isActive?(st.color===colors.red?'#b93647':'#c39d04'):'#c4d1c8',
+    weight:isActive?(close?1.8:1.45):(close?.5:0),
+    opacity:isActive?1:(close?.37:0),
+    dashArray:''
+   });
+   if(isActive)l.bringToFront();
    l.bindTooltip(label(l.feature.properties||{})+' · '+st.label,{sticky:true});
   }));
   /* Без виділення Обухівського району */
@@ -343,8 +354,7 @@ refresh();setInterval(refresh,60000);
    const point=L.circleMarker([lat,lng],{radius:1.2,color:'#63776e',weight:0,fillColor:'#63776e',fillOpacity:.72}).addTo(cityLayer);
    point.bindTooltip(name,{permanent:true,direction:'right',offset:[4,0],className:name==='Київ'?'mainCityLabel':'cityNameLabel'});
   });
-  if(z<=6.5)L.marker([48.65,32.2],{interactive:false,keyboard:false,zIndexOffset:-500,
-    icon:L.divIcon({className:'ksh-country-caption',html:'Україна',iconSize:[150,32],iconAnchor:[75,16]})}).addTo(cityLayer);
+  // Не дублюємо напис «Україна» поверх підпису картографічної підкладки.
  }
  map.on('zoomend',paintCities);paintCities();
  const villages=[['Стрітівка',49.94,30.76],['Стайки',50.07,30.90],['Халча',49.99,31.02],['Гребені',50.02,30.89],['Дівички',50.09,31.12],['Трипілля',50.12,30.78],['Витачів',50.07,30.87],['Пії',49.72,30.97],['Карапиші',49.64,30.79],['Росава',49.72,31.05],['Зеленьки',49.68,31.18],['Маслівка',49.68,31.08],['Потік',49.82,31.04],['Слобода',49.79,30.87],['Шубівка',49.84,30.61],['Леонівка',49.78,30.75],['Сущани',49.89,30.73],['Великі Дмитровичі',50.08,30.60],['Малі Дмитровичі',50.07,30.65],['Козин',50.23,30.65],['Підгірці',50.25,30.56],['Хотів',50.33,30.47],['Гатне',50.36,30.41],['Чабани',50.34,30.43]];
@@ -369,8 +379,7 @@ refresh();setInterval(refresh,60000);
    const fs=features(geo);
    const matched=fs.filter(f=>/обухівськ|obukhiv|obukhov/i.test(JSON.stringify(f.properties||{})));
    if(!matched.length)throw Error('Не знайдено Обухівський район');
-   /* Контур району не додаємо окремим шаром */
-   district.bindTooltip('Обухівський район · статус за даними моніторингу',{sticky:true});
+   /* Окремий дубль контуру не потрібний: район вже додано функцією loadRayons. */
   }catch(e){console.warn('Межі Обухівського району недоступні',e);}
  }
  draw();
