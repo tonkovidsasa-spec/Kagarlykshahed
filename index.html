@@ -53,7 +53,7 @@
 #demoDuration{background:#1f2a35;color:#eaf0f6;border:1px solid #46576a;border-radius:7px;padding:7px}
 @media(max-width:650px){.demoPanel{width:min(289px,calc(100vw - 20px))!important}.demoNotice{top:4px;font-size:10px}}
 /* Спокійна світла підкладка без нічної інверсії, як у референсі. */
-.ksh-detail-tiles{filter:saturate(1.08) brightness(1.01) contrast(.98)!important;opacity:1!important}
+.ksh-detail-tiles{filter:saturate(.68) brightness(1.07) contrast(.91)!important;opacity:1!important}
 .leaflet-container,#regionMap,#liveMapFrame{background:#dce7d3!important}
 .leaflet-control-attribution{background:#fffdf4d9!important;color:#535f5c!important}
 .leaflet-control-attribution a{color:#286cab!important}
@@ -151,9 +151,12 @@ refresh();setInterval(refresh,60000);
  const overviewTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
   pane:'overviewTiles',maxZoom:13,minZoom:5,attribution:'Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors',className:'ksh-overview-tiles'
  }).addTo(map);
- const detailTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{pane:'detailTiles',maxZoom:20,minZoom:8,opacity:1,subdomains:'abcd',attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>',className:'ksh-detail-tiles'});
- let detailFallback=false;
- detailTiles.on('tileerror',()=>{if(detailFallback)return;detailFallback=true;detailTiles.setUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png');});
+ /* Базові OSM-тайли: відкритий стиль без API-ключа; жодних placeholder-тайлів CARTO. */
+ const detailTiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  pane:'detailTiles',minZoom:8,maxZoom:19,maxNativeZoom:19,opacity:1,
+  attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>',
+  className:'ksh-detail-tiles'
+ });
  let overviewFallback=false;
  overviewTiles.on('tileerror',()=>{
   if(overviewFallback)return;overviewFallback=true;
