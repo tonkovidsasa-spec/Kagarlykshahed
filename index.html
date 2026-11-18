@@ -39,7 +39,20 @@
  #kshDock .kshBrandMark{width:30px;height:32px}
 }
 @media(prefers-reduced-motion:reduce){#kshDock .kshNavAction{transition:none}}
-</style></head><body><div id="liveMapFrame"><div id="regionMap" role="application" aria-label="Карта повітряних тривог України"></div></div><button id="demoToggle" class="demoToggle">⚙ ТЕСТОВИЙ РЕЖИМ</button><div id="demoPanel" class="demoPanel" hidden><b>Умовні тривоги</b><p>Лише в цьому браузері. Вибери район на карті, а потім статус. Область теж можна вибрати окремо. Інші відвідувачі змін не побачать.</p><div id="demoSelected">Область не вибрано</div><button data-demo="red">🔴 Тривога</button><button data-demo="yellow">🟡 Загроза</button><button data-demo="off">⚫ Відбій</button><button id="demoMarker">◇ Шахед (умовний)</button><button id="demoBallistic">↑ Балістика (умовна)</button><button id="demoClear">Скинути</button><p>Це навчальна симуляція, не офіційні сповіщення. Маркери шахедів і балістики умовні, не відображають реальних цілей, місць запуску чи маршрутів.</p></div><div id="demoNotice" class="demoNotice" hidden>ТЕСТОВИЙ РЕЖИМ</div>
+</style><style id="kshMotionStyles">
+.ksh-detail-tiles{filter:grayscale(1) invert(1) brightness(.64) contrast(1.12) saturate(.08)!important}
+.ksh-target-icon{border:0!important;background:transparent!important;filter:drop-shadow(0 2px 3px #000c)}
+.ksh-target-art{display:grid;place-items:center;width:100%;height:100%;transform:rotate(var(--bearing,0deg));transition:transform .24s linear}
+.ksh-target-art svg{display:block}
+.ksh-target-icon.ksh-selected .ksh-target-art{border-radius:50%;background:rgba(99,195,244,.12);box-shadow:0 0 0 1px #63c3f4,0 0 0 5px rgba(99,195,244,.1)}
+.demoPanel{width:289px!important}
+.demoPanel #demoSelected{margin:9px 0;padding:8px;border:1px solid #475565;border-radius:8px;font-size:11px;color:#e6f2f8;line-height:1.4}
+.demoPanel button{transition:background .15s ease}
+.demoPanel button:hover{background:#37516b}
+.kshDemoLabel{display:inline-block;margin:7px 6px 2px 3px;color:#becbd5;font-size:11px}
+#demoDuration{background:#1f2a35;color:#eaf0f6;border:1px solid #46576a;border-radius:7px;padding:7px}
+@media(max-width:650px){.demoPanel{width:min(289px,calc(100vw - 20px))!important}.demoNotice{top:4px;font-size:10px}}
+</style></head><body><div id="liveMapFrame"><div id="regionMap" role="application" aria-label="Карта повітряних тривог України"></div></div><button id="demoToggle" class="demoToggle">⚙ ТЕСТОВИЙ РЕЖИМ</button><div id="demoPanel" class="demoPanel" hidden><b>Умовні тривоги</b><p>Лише в цьому браузері. Вибери район на карті, а потім статус. Область теж можна вибрати окремо. Інші відвідувачі змін не побачать.</p><div id="demoSelected">Область не вибрано</div><button data-demo="red">🔴 Тривога</button><button data-demo="yellow">🟡 Загроза</button><button data-demo="off">⚫ Відбій</button><button id="demoMarker">✈ Додати БПЛА</button><button id="demoBallistic">↑ Додати балістику</button><button id="demoMove">↗ Анімувати рух</button><button id="demoStop">■ Зупинити рух</button><button id="demoRemove">✕ Видалити вибраний</button><label for="demoDuration" class="kshDemoLabel">Тривалість руху</label><select id="demoDuration" aria-label="Тривалість демонстраційного руху"><option value="4000">4 с</option><option value="8000" selected>8 с</option><option value="15000">15 с</option></select><button id="demoClear">Скинути все</button><p>Це навчальна симуляція, не офіційні сповіщення. Умовні маркери можна перетягувати й анімувати між довільними точками. Їхні позиції та рух не є реальними цілями, маршрутами або сповіщеннями.</p></div><div id="demoNotice" class="demoNotice" hidden>ДЕМОНСТРАЦІЯ · НЕ РЕАЛЬНІ ЦІЛІ</div>
 <nav id="kshDock" aria-label="Панель KSH">
  <div class="kshBrand" aria-label="KSH — Кагарлик Моніторинг">
   <span class="kshBrandMark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><path d="M6.1 6.1a8.3 8.3 0 0 0 0 11.8M17.9 6.1a8.3 8.3 0 0 1 0 11.8M9 9a4.4 4.4 0 0 0 0 6M15 9a4.4 4.4 0 0 1 0 6"/></svg></span>
@@ -121,9 +134,9 @@ refresh();setInterval(refresh,60000);
  /* Темна картографічна підкладка з дорогами, водоймами та назвами населених пунктів. */
  /* Деталізована підкладка з дорогами, водоймами та забудовою на великому масштабі. */
  const detailPane=map.createPane('detailTiles');detailPane.style.zIndex='180';detailPane.style.pointerEvents='none';
- const detailTiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{pane:'detailTiles',maxZoom:19,minZoom:8,opacity:1,attribution:'&copy; OpenStreetMap contributors',className:'ksh-detail-tiles'});
+ const detailTiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{pane:'detailTiles',maxZoom:19,minZoom:5,opacity:1,attribution:'&copy; OpenStreetMap contributors',className:'ksh-detail-tiles'});
  /* Фільтр тайлів визначається спільним CSS-стилем. */
- function updateDetail(){if(map.getZoom()>=8){if(!map.hasLayer(detailTiles))detailTiles.addTo(map);}else if(map.hasLayer(detailTiles)){map.removeLayer(detailTiles);}if(oblasts)paintOblasts();paintRayons();}
+ function updateDetail(){if(!map.hasLayer(detailTiles))detailTiles.addTo(map);if(oblasts)paintOblasts();paintRayons();}
  map.on('zoomend',updateDetail);
 
  const base='https://cdn.jsdelivr.net/gh/darmat1/ukraine-geo-data@main/geodata/';
@@ -133,7 +146,7 @@ refresh();setInterval(refresh,60000);
  const keys={'вінницька':'vinnytska','волинська':'volynska','дніпропетровська':'dnipropetrovska','донецька':'donetska','житомирська':'zhytomyrska','закарпатська':'zakarpatska','запорізька':'zaporizka','іванофранківська':'ivano-frankivska','київська':'kyivska','кіровоградська':'kirovohradska','луганська':'luhanska','львівська':'lvivska','миколаївська':'mykolaivska','одеська':'odeska','полтавська':'poltavska','рівненська':'rivnenska','сумська':'sumska','тернопільська':'ternopilska','харківська':'kharkivska','херсонська':'khersonska','хмельницька':'khmelnytska','черкаська':'cherkaska','чернівецька':'chernivetska','чернігівська':'chernihivska','аркрим':'krym','крим':'krym'};
  const oblastKey=p=>{const n=normalize(label(p));return keys[n]||null;};
  function alertColor(k){if(!latestAlerts)return colors.unknown;const group=latestAlerts.filter(a=>a.type!=='district'&&a.slug===k);if(!group.length)return colors.off;const levels=group.map(a=>a.level);return levels.includes('red')?colors.red:levels.includes('yellow')?colors.yellow:colors.partial;}
- function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);l.setStyle({fillColor:c,fillOpacity:map.getZoom()>=8?.43:.97,color:'#222b37',weight:.8,opacity:.88});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
+ function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);l.setStyle({fillColor:c,fillOpacity:demo.enabled&&override?.11:0,color:demo.enabled&&override?c:'#556373',weight:demo.enabled&&override?1.25:.7,opacity:.63});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
 
  const oblastLabelPoints=[
   ['Волинська',50.78,25.05],['Рівненська',50.62,26.37],['Житомирська',50.45,28.77],
@@ -159,30 +172,92 @@ refresh();setInterval(refresh,60000);
  }
  map.on('zoomend',paintOblastLabels);
  window.updateUkraineAlerts=function(alerts){latestAlerts=alerts;paintOblasts();paintRayons();const legend=document.querySelector('.ukMapLegend');if(legend)legend.textContent=alerts?'🔴 Тривога  🟡 Дронова загроза  ⚫ Відбій · оновлення щохвилини':'Дані недоступні — перевірте офіційні сповіщення';};
- const demo={enabled:false,selected:null,overrides:new Map(),markers:[],mode:'select'}; const districtKey=(oblast,feature)=>oblast+'::'+String(label(feature.properties||{})).trim();
+ const demo={enabled:false,selected:null,selectedMarker:null,overrides:new Map(),markers:[],animations:new Map(),mode:'select'}; const districtKey=(oblast,feature)=>oblast+'::'+String(label(feature.properties||{})).trim();
  const toggle=document.getElementById('demoToggle'),panel=document.getElementById('demoPanel'),notice=document.getElementById('demoNotice');
- toggle.addEventListener('click',()=>{demo.enabled=!demo.enabled;panel.hidden=!demo.enabled;notice.hidden=!demo.enabled;toggle.textContent=demo.enabled?'✕ ЗАКРИТИ ТЕСТ':'⚙ ТЕСТОВИЙ РЕЖИМ';paintOblasts();paintRayons();});
+ toggle.addEventListener('click',()=>{demo.enabled=!demo.enabled;panel.hidden=!demo.enabled;notice.hidden=!demo.enabled;toggle.textContent=demo.enabled?'✕ ЗАКРИТИ ТЕСТ':'⚙ ТЕСТОВИЙ РЕЖИМ';if(!demo.enabled)resetTestMarkers();paintOblasts();paintRayons();});
  document.querySelectorAll('[data-demo]').forEach(b=>b.addEventListener('click',()=>{if(!demo.selected)return;demo.overrides.set(demo.selected,b.dataset.demo);paintOblasts();paintRayons();}));
- document.getElementById('demoClear').addEventListener('click',()=>{demo.overrides.clear();demo.markers.forEach(m=>map.removeLayer(m));demo.markers=[];paintOblasts();paintRayons();});
- document.getElementById('demoMarker').addEventListener('click',()=>{demo.mode='drone';document.getElementById('demoSelected').textContent='Клацни на карті для умовного маркера шахеда';});
- document.getElementById('demoBallistic').addEventListener('click',()=>{demo.mode='ballistic';document.getElementById('demoSelected').textContent='Клацни на карті для умовного маркера балістики';});
 
- // Стилізація за наданим зразком: силует «дельта», чорна заливка, білий контур та темний ореол.
- const droneSvg='<svg width="30" height="30" viewBox="165 51 40 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Умовний шахед"><path d="M181 53 L177 59 L176 75 L167 86 L172 85 L178 80 L200 82 L202 80 L192 69 L194 66 L190 65 Z" fill="#ff5a36" stroke="#ff5a36" stroke-width="1.1" stroke-linejoin="round"/></svg>';
- const ballisticSvg='<svg width="27" height="32" viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Умовна балістика"><path d="M16 3 Q19 7 20 13 L20 24 L24 30 L24 32 L18 28 L17 35 L15 35 L14 28 L8 32 L8 30 L12 24 L12 13 Q13 7 16 3 Z" stroke="#080b0f" stroke-width="5" stroke-linejoin="round" fill="#151b23"/><path d="M16 3 Q19 7 20 13 L20 24 L24 30 L24 32 L18 28 L17 35 L15 35 L14 28 L8 32 L8 30 L12 24 L12 13 Q13 7 16 3 Z" stroke="#ffd49a" stroke-width="2" stroke-linejoin="round" fill="#151b23"/><path d="M16 12 V25" stroke="#ffd49a" stroke-width="1.3"/></svg>';
-
- function targetIcon(ballistic){
-  const size=ballistic?(map.getZoom()<8?23:28):(map.getZoom()<8?27:32);
-  const html=(ballistic?ballisticSvg:droneSvg).replace(/width="[0-9]+" height="[0-9]+"/,'width="'+size+'" height="'+size+'"');
-  return L.divIcon({className:'ksh-target-icon',html,iconSize:[size,size],iconAnchor:[size/2,size/2]});
+ const selectedText=document.getElementById('demoSelected');
+ const durationSelect=document.getElementById('demoDuration');
+ const droneSvg='<svg width="36" height="36" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Умовна модель БПЛА"><path d="M32 5L57 45 39 41 35 50 33 57 31 57 29 50 25 41 7 45Z" fill="#9ba8b3" stroke="#25313d" stroke-width="3" stroke-linejoin="round"/><path d="M32 7 33 47 30 48Z" fill="#eff5f7" opacity=".85"/><path d="M32 12 51 42 37 39Z" fill="#d7e0e5" opacity=".6"/><path d="M32 12 13 42 27 39Z" fill="#677a8a" opacity=".58"/><path d="M23 46H41" stroke="#e2e9ef" stroke-width="1.7" opacity=".65"/></svg>';
+ const ballisticSvg='<svg width="32" height="32" viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Умовна модель балістики"><path d="M16 3Q19 7 20 13V24L24 30V32L18 28 17 35H15L14 28 8 32V30L12 24V13Q13 7 16 3Z" stroke="#161e29" stroke-width="4" fill="#7e96a9" stroke-linejoin="round"/><path d="M16 4V27" stroke="#edf3f6" stroke-width="1.4"/></svg>';
+ function targetIcon(ballistic,bearing=0){
+  const size=ballistic?(map.getZoom()<8?25:31):(map.getZoom()<8?30:38);
+  const svg=(ballistic?ballisticSvg:droneSvg).replace(/width="[0-9]+" height="[0-9]+"/,'width="'+size+'" height="'+size+'"');
+  return L.divIcon({className:'ksh-target-icon',html:'<span class="ksh-target-art" style="--bearing:'+Number(bearing||0).toFixed(1)+'deg">'+svg+'</span>',iconSize:[size,size],iconAnchor:[size/2,size/2]});
  }
- map.on('zoomend',()=>{demo.markers.forEach(m=>m.setIcon(targetIcon(m.options.kshBallistic)));});
+ function refreshMarkerIcon(m){
+  m.setIcon(targetIcon(!!m.options.kshBallistic,m.options.kshBearing||0));
+  const el=m.getElement();if(el)el.classList.toggle('ksh-selected',demo.selectedMarker===m);
+ }
+ function selectMarker(m){
+  demo.selectedMarker=m;demo.mode='select';
+  demo.markers.forEach(refreshSelection);
+  selectedText.textContent=m?(m.options.kshBallistic?'Балістика':'БПЛА')+' вибрано. Перетягни мишкою або натисни «Анімувати рух».':'Вибери умовний маркер на мапі.';
+ }
+ function refreshSelection(m){
+  const el=m.getElement();if(el)el.classList.toggle('ksh-selected',demo.selectedMarker===m);
+ }
+ function stopMotion(m){
+  const a=demo.animations.get(m);
+  if(a){cancelAnimationFrame(a.frame);demo.animations.delete(m);}
+ }
+ function resetTestMarkers(){
+  demo.markers.forEach(m=>{stopMotion(m);map.removeLayer(m);});
+  demo.markers=[];demo.selectedMarker=null;demo.mode='select';
+  selectedText.textContent='Маркери очищено. Вибери тип, щоб додати умовну ціль.';
+ }
+ function animateMarker(m,destination){
+  stopMotion(m);
+  const source=m.getLatLng(),target=L.latLng(destination),ms=Number(durationSelect.value)||8000;
+  const dLat=target.lat-source.lat,dLng=target.lng-source.lng;
+  const heading=Math.atan2(dLng*Math.cos(source.lat*Math.PI/180),dLat)*180/Math.PI;
+  m.options.kshBearing=heading;refreshMarkerIcon(m);
+  const startTime=performance.now();
+  const anim={frame:0};
+  demo.animations.set(m,anim);
+  function tick(now){
+   if(!demo.animations.has(m))return;
+   const t=Math.min(1,(now-startTime)/ms);
+   const eased=t*t*(3-2*t);
+   m.setLatLng([source.lat+dLat*eased,source.lng+dLng*eased]);
+   if(t<1)anim.frame=requestAnimationFrame(tick);
+   else{demo.animations.delete(m);selectedText.textContent='Демонстраційне переміщення завершено.';}
+  }
+  anim.frame=requestAnimationFrame(tick);
+ }
+ document.getElementById('demoClear').addEventListener('click',()=>{
+  resetTestMarkers();demo.overrides.clear();paintOblasts();paintRayons();
+ });
+ document.getElementById('demoMarker').addEventListener('click',()=>{
+  demo.mode='drone';selectedText.textContent='Клацни на мапі, щоб додати умовний БПЛА.';
+ });
+ document.getElementById('demoBallistic').addEventListener('click',()=>{
+  demo.mode='ballistic';selectedText.textContent='Клацни на мапі, щоб додати умовну балістику.';
+ });
+ document.getElementById('demoMove').addEventListener('click',()=>{
+  if(!demo.selectedMarker){selectedText.textContent='Спочатку клацни на доданому маркері.';return;}
+  demo.mode='move';selectedText.textContent='Клацни на мапі, куди має плавно переміститися умовний маркер.';
+ });
+ document.getElementById('demoStop').addEventListener('click',()=>{
+  if(demo.selectedMarker){stopMotion(demo.selectedMarker);selectedText.textContent='Демонстраційний рух зупинено.';}
+ });
+ document.getElementById('demoRemove').addEventListener('click',()=>{
+  const m=demo.selectedMarker;if(!m)return;
+  stopMotion(m);map.removeLayer(m);demo.markers=demo.markers.filter(x=>x!==m);selectMarker(null);
+ });
+ map.on('zoomend',()=>demo.markers.forEach(refreshMarkerIcon));
  map.on('click',e=>{
-  if(!demo.enabled||!['drone','ballistic'].includes(demo.mode))return;
+  if(!demo.enabled)return;
+  if(demo.mode==='move'&&demo.selectedMarker){animateMarker(demo.selectedMarker,e.latlng);demo.mode='select';return;}
+  if(!['drone','ballistic'].includes(demo.mode))return;
   const ballistic=demo.mode==='ballistic';
-  const m=L.marker(e.latlng,{icon:targetIcon(ballistic),kshBallistic:ballistic}).addTo(map);
-  m.bindPopup(ballistic?'УМОВНА БАЛІСТИКА · ТЕСТОВИЙ МАРКЕР':'УМОВНИЙ ШАХЕД · ТЕСТОВИЙ МАРКЕР');
-  demo.markers.push(m);demo.mode='select';document.getElementById('demoSelected').textContent='Умовний маркер додано';
+  const m=L.marker(e.latlng,{icon:targetIcon(ballistic),kshBallistic:ballistic,kshBearing:0,draggable:true,autoPan:true}).addTo(map);
+  m.bindPopup(ballistic?'УМОВНА БАЛІСТИКА · НЕ РЕАЛЬНА ЦІЛЬ':'УМОВНИЙ БПЛА · НЕ РЕАЛЬНА ЦІЛЬ');
+  m.on('click',ev=>{if(ev.originalEvent)L.DomEvent.stopPropagation(ev.originalEvent);selectMarker(m);});
+  m.on('dragstart',()=>{stopMotion(m);selectMarker(m);});
+  m.on('dragend',()=>{selectedText.textContent='Умовний маркер переміщено вручну.';});
+  demo.markers.push(m);selectMarker(m);
  });
  const ukBounds=L.latLngBounds([[44.0,21.5],[52.5,40.6]]);
  map.fitBounds(ukBounds,{padding:[85,110],maxZoom:6});
@@ -213,7 +288,7 @@ refresh();setInterval(refresh,60000);
  function paintRayons(){
   rayonLayers.forEach(({layer,slug})=>layer.eachLayer(l=>{
    const override=demo.enabled&&(demo.overrides.get(districtKey(slug,l.feature))||demo.overrides.get(slug));const st=override?{color:override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off,label:'Тестовий статус'}:rayonStatus(l.feature,slug);
-   l.setStyle({fillColor:st.color,fillOpacity:map.getZoom()>=8?.44:.96,color:'#222b37',weight:.5,opacity:.80});
+   l.setStyle({fillColor:st.color,fillOpacity:demo.enabled&&override?.12:0,color:demo.enabled&&override?st.color:'#596778',weight:demo.enabled&&override?1.45:.7,opacity:map.getZoom()>=8?.65:.48,dashArray:demo.enabled&&override?'':'4 5'});
    l.bindTooltip(label(l.feature.properties||{})+' · '+st.label,{sticky:true});
   }));
   /* Без виділення Обухівського району */
