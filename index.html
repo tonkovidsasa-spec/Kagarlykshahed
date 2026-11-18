@@ -53,7 +53,7 @@
 #demoDuration{background:#1f2a35;color:#eaf0f6;border:1px solid #46576a;border-radius:7px;padding:7px}
 @media(max-width:650px){.demoPanel{width:min(289px,calc(100vw - 20px))!important}.demoNotice{top:4px;font-size:10px}}
 /* Спокійна світла підкладка без нічної інверсії, як у референсі. */
-.ksh-detail-tiles{filter:saturate(.79) brightness(1.06) contrast(.94)!important;opacity:1!important}
+.ksh-detail-tiles{filter:saturate(1.08) brightness(1.01) contrast(.98)!important;opacity:1!important}
 .leaflet-container,#regionMap,#liveMapFrame{background:#dce7d3!important}
 .leaflet-control-attribution{background:#fffdf4d9!important;color:#535f5c!important}
 .leaflet-control-attribution a{color:#286cab!important}
@@ -142,7 +142,7 @@ refresh();setInterval(refresh,60000);
 </script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script>
 (function(){
  const node=document.getElementById('regionMap');if(!node||!window.L)return;
- const map=L.map(node,{zoomControl:true,scrollWheelZoom:true,minZoom:5,maxZoom:13,attributionControl:true,zoomSnap:.25}).setView([48.7,31.4],6);
+ const map=L.map(node,{zoomControl:true,scrollWheelZoom:true,minZoom:5,maxZoom:18,attributionControl:true,zoomSnap:.25}).setView([48.7,31.4],6);
  map.attributionControl.addAttribution('Дані тривог: <a href="https://tryvoha.online/" target="_blank" rel="noopener noreferrer">Tryvoha.online</a>');
  map.getContainer().style.background='#e3ebde';
  /* На загальному масштабі — мінімальна картографія, без зайвих назв і доріг. */
@@ -151,7 +151,7 @@ refresh();setInterval(refresh,60000);
  const overviewTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
   pane:'overviewTiles',maxZoom:13,minZoom:5,attribution:'Tiles &copy; Esri, HERE, Garmin, OpenStreetMap contributors',className:'ksh-overview-tiles'
  }).addTo(map);
- const detailTiles=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{pane:'detailTiles',maxZoom:19,minZoom:8,opacity:1,attribution:'Tiles &copy; Esri and contributors; OpenStreetMap',className:'ksh-detail-tiles'});
+ const detailTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{pane:'detailTiles',maxZoom:20,minZoom:8,opacity:1,subdomains:'abcd',attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>',className:'ksh-detail-tiles'});
  let detailFallback=false;
  detailTiles.on('tileerror',()=>{if(detailFallback)return;detailFallback=true;detailTiles.setUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png');});
  let overviewFallback=false;
@@ -175,7 +175,7 @@ refresh();setInterval(refresh,60000);
  const keys={'вінницька':'vinnytska','волинська':'volynska','дніпропетровська':'dnipropetrovska','донецька':'donetska','житомирська':'zhytomyrska','закарпатська':'zakarpatska','запорізька':'zaporizka','іванофранківська':'ivano-frankivska','київська':'kyivska','кіровоградська':'kirovohradska','луганська':'luhanska','львівська':'lvivska','миколаївська':'mykolaivska','одеська':'odeska','полтавська':'poltavska','рівненська':'rivnenska','сумська':'sumska','тернопільська':'ternopilska','харківська':'kharkivska','херсонська':'khersonska','хмельницька':'khmelnytska','черкаська':'cherkaska','чернівецька':'chernivetska','чернігівська':'chernihivska','аркрим':'krym','крим':'krym'};
  const oblastKey=p=>{const n=normalize(label(p));return keys[n]||null;};
  function alertColor(k){if(!latestAlerts)return colors.unknown;const group=latestAlerts.filter(a=>a.type!=='district'&&a.slug===k);if(!group.length)return colors.off;const levels=group.map(a=>a.level);return levels.includes('red')?colors.red:levels.includes('yellow')?colors.yellow:colors.partial;}
- function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);const isActive=c!==colors.off&&c!==colors.unknown;l.setStyle({fillColor:isActive?c:colors.off,fillOpacity:isActive?(map.getZoom()>=8?.33:.54):0,color:isActive?(c===colors.red?'#ca4754':'#d6b01d'):'#b6c3b9',weight:isActive?1.6:.65,opacity:isActive?.98:.66});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
+ function paintOblasts(){if(!oblasts)return;oblasts.eachLayer(l=>{const k=oblastKey(l.feature.properties||{});const override=demo.enabled&&demo.overrides.get(k);const c=override?(override==='red'?colors.red:override==='yellow'?colors.yellow:colors.off):(k?alertColor(k):colors.unknown);const isActive=c!==colors.off&&c!==colors.unknown;l.setStyle({fillColor:isActive?c:colors.off,fillOpacity:isActive?(map.getZoom()>=8?.085:.40):0,color:isActive?(c===colors.red?'#d44b57':'#d5b122'):'#b6c3b9',weight:isActive?(map.getZoom()>=8?1.65:1.4):.65,opacity:isActive?.95:.66});l.bindTooltip(label(l.feature.properties||{})+(latestAlerts?(k?(c===colors.off?' · Відбій / немає активної тривоги':c===colors.red?' · Повітряна тривога':c===colors.yellow?' · Дронова загроза':' · Часткова тривога'):' · Дані не зіставлено'):' · Дані недоступні'),{sticky:true});});}
 
  const oblastLabelPoints=[
   ['Волинська',50.78,25.05],['Рівненська',50.62,26.37],['Житомирська',50.45,28.77],
@@ -314,9 +314,10 @@ refresh();setInterval(refresh,60000);
    // Тривога в конкретному районі має бути видимою навіть на масштабі всієї України.
    l.setStyle({
     fillColor:st.color,
-    fillOpacity:isActive?(close?.37:.66):0,
-    color:isActive?(st.color===colors.red?'#b93647':'#c39d04'):'#c4d1c8',
-    weight:isActive?(close?1.8:1.45):(close?.5:0),
+    // Поблизу не закриваємо дороги, населені пункти і річки кольором тривоги.
+    fillOpacity:isActive?(close?.12:.48):0,
+    color:isActive?(st.color===colors.red?'#d13f4c':'#c8a21d'):'#c4d1c8',
+    weight:isActive?(close?2.1:1.65):(close?.5:0),
     opacity:isActive?1:(close?.37:0),
     dashArray:''
    });
