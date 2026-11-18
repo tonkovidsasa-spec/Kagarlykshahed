@@ -189,7 +189,7 @@ refresh();setInterval(refresh,60000);
  function targetIcon(ballistic,bearing=0){
   const size=ballistic?(map.getZoom()<8?24:30):(map.getZoom()<8?34:43);
   const svg=(ballistic?ballisticSvg:droneSvg).replace(/width="[0-9]+" height="[0-9]+"/,'width="'+size+'" height="'+size+'"');
-  return L.divIcon({className:'ksh-target-icon',html:'<span class="ksh-target-art" style="--bearing:'+(Number(bearing||0)-90).toFixed(1)+'deg">'+svg+'</span>',iconSize:[size,size],iconAnchor:[size/2,size/2]});
+  return L.divIcon({className:'ksh-target-icon',html:'<span class="ksh-target-art" style="--bearing:'+(ballistic?Number(bearing||0):Number(bearing||0)-90).toFixed(1)+'deg">'+svg+'</span>',iconSize:[size,size],iconAnchor:[size/2,size/2]});
  }
  function refreshMarkerIcon(m){
   m.setIcon(targetIcon(!!m.options.kshBallistic,m.options.kshBearing||0));
